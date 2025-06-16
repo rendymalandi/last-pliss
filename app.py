@@ -15,7 +15,7 @@ from joblib import load
 # Load dataset dan model
 url = "https://raw.githubusercontent.com/rendymalandi/last-pliss/main/Heart_Disease_Prediction.csv"
 df = pd.read_csv(url)
-model = load("heart_disease_model.pkl")
+model = load('xgboost_heart_disease_pipeline.pkl')
 
 # Sidebar navigasi
 st.sidebar.title("Navigasi")
