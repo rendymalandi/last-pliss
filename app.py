@@ -15,7 +15,7 @@ from joblib import load
 # Load dataset dan model
 url = "https://raw.githubusercontent.com/rendymalandi/last-pliss/main/Heart_Disease_Prediction.csv"
 df = pd.read_csv(url)
-model = joblib.load("heart_disease_model.pkl")
+model = load("heart_disease_model.pkl")
 
 # Sidebar navigasi
 st.sidebar.title("Navigasi")
