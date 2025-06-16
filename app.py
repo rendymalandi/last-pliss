@@ -32,7 +32,7 @@ if page == "Dataset":
     st.write(df.describe())
 
     st.subheader("Distribusi Target:")
-    st.bar_chart(df['HeartDisease'].value_counts())
+    st.bar_chart(df['Heart Disease'].value_counts())
 
 # Halaman 2 - Modeling
 elif page == "Modeling":
