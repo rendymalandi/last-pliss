@@ -10,6 +10,7 @@ Original file is located at
 import streamlit as st
 import pandas as pd
 import joblib
+from joblib import load
 
 # Load dataset dan model
 url = "https://raw.githubusercontent.com/rendymalandi/last-pliss/main/Heart_Disease_Prediction.csv"
