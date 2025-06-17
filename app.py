@@ -71,7 +71,6 @@ elif page == "Prediksi":
             "Thallium": [thallium]
         })
 
-        # Pastikan tipe kategorikal disesuaikan
         categorical = [
             "Sex", "Chest pain type", "EKG results", "Exercise angina",
             "Slope of ST", "Thallium"
@@ -80,11 +79,20 @@ elif page == "Prediksi":
             input_df[col] = input_df[col].astype("category")
 
         try:
-            result = model.predict(input_df)[0]
-            if result == 1:
+            prob = model.predict_proba(input_df)[0][1]  # Probabilitas kelas 1 (berisiko)
+            pred = int(prob >= 0.5)  # Default threshold 0.5
+
+            st.write(f"🔢 **Probabilitas berisiko**: `{prob:.2f}`")
+
+            if pred == 1:
                 st.error("⚠️ Pasien berisiko mengalami penyakit jantung.")
             else:
                 st.success("✅ Pasien tidak berisiko mengalami penyakit jantung.")
+
+            # Tambahkan slider threshold jika mau kontrol manual
+            st.slider("Threshold Risiko", 0.0, 1.0, 0.5, key="threshold", disabled=True)
+
         except Exception as e:
             st.error("❌ Terjadi kesalahan saat prediksi.")
             st.exception(e)
+
