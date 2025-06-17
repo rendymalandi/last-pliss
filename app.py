@@ -49,7 +49,7 @@ elif page == "Prediksi":
     ekg = st.selectbox("EKG results", ["Normal", "ST", "LVH"])
     max_hr = st.number_input("Max HR", 0, 250, 150)
     exercise_angina = st.selectbox("Exercise angina", ["Y", "N"])
-    st_depression = st.number_input("ST depression", value=1.0)
+    st_depression = st.text_input("ST depression", value="1.0")
     slope = st.selectbox("Slope of ST", ["Up", "Flat", "Down"])
     vessels = st.selectbox("Number of vessels fluro", [0, 1, 2, 3])
     thallium = st.selectbox("Thallium", ["Normal", "Fixed Defect", "Reversable Defect"])
@@ -57,31 +57,32 @@ elif page == "Prediksi":
     threshold = st.slider("🎚️ Threshold Risiko", 0.0, 1.0, 0.5, step=0.01)
 
     if st.button("Prediksi"):
-        input_df = pd.DataFrame({
-            "Age": [age],
-            "Sex": [sex],
-            "Chest pain type": [chest_pain],
-            "BP": [bp],
-            "Cholesterol": [cholesterol],
-            "FBS over 120": [fbs],
-            "EKG results": [ekg],
-            "Max HR": [max_hr],
-            "Exercise angina": [exercise_angina],
-            "ST depression": [st_depression],
-            "Slope of ST": [slope],
-            "Number of vessels fluro": [vessels],
-            "Thallium": [thallium]
-        })
-
-        # Pastikan kategori terdeteksi
-        categorical = [
-            "Sex", "Chest pain type", "EKG results", "Exercise angina",
-            "Slope of ST", "Thallium"
-        ]
-        for col in categorical:
-            input_df[col] = input_df[col].astype("category")
-
         try:
+            st_depression_float = float(str(st_depression).replace(",", "."))
+            input_df = pd.DataFrame({
+                "Age": [age],
+                "Sex": [sex],
+                "Chest pain type": [chest_pain],
+                "BP": [bp],
+                "Cholesterol": [cholesterol],
+                "FBS over 120": [fbs],
+                "EKG results": [ekg],
+                "Max HR": [max_hr],
+                "Exercise angina": [exercise_angina],
+                "ST depression": [st_depression_float],
+                "Slope of ST": [slope],
+                "Number of vessels fluro": [vessels],
+                "Thallium": [thallium]
+            })
+
+            # Pastikan kategori terdeteksi
+            categorical = [
+                "Sex", "Chest pain type", "EKG results", "Exercise angina",
+                "Slope of ST", "Thallium"
+            ]
+            for col in categorical:
+                input_df[col] = input_df[col].astype("category")
+
             prob = model.predict_proba(input_df)[0][1]  # Probabilitas kelas 1 (berisiko)
             pred = int(prob >= threshold)
 
@@ -98,5 +99,5 @@ elif page == "Prediksi":
                 st.success("✅ Pasien tidak berisiko mengalami penyakit jantung.")
 
         except Exception as e:
-            st.error("❌ Terjadi kesalahan saat prediksi.")
+            st.error("❌ Terjadi kesalahan saat prediksi. Mohon periksa kembali input Anda.")
             st.exception(e)
