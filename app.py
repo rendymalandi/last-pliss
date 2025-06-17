@@ -26,11 +26,17 @@ elif page == "Modeling":
     try:
         url = "https://raw.githubusercontent.com/rendymalandi/last-pliss/main/Heart_Disease_Prediction.csv"
         df = pd.read_csv(url)
+
+        # Konversi label target ke numerik
+        df["Heart Disease"] = df["Heart Disease"].map({"Absence": 0, "Presence": 1})
+
         from sklearn.metrics import classification_report
         X = df.drop("Heart Disease", axis=1)
         y = df["Heart Disease"]
         y_pred = model.predict(X)
+
         report = classification_report(y, y_pred, output_dict=True)
+        st.write("**Classification Report:**")
         st.json(report)
     except Exception as e:
         st.warning(f"Error saat evaluasi model: {e}")
@@ -71,6 +77,7 @@ elif page == "Prediksi":
             "Thallium": [thallium]
         })
 
+        # Pastikan tipe kategorikal sesuai pipeline
         categorical = [
             "Sex", "Chest pain type", "EKG results", "Exercise angina",
             "Slope of ST", "Thallium"
@@ -79,20 +86,17 @@ elif page == "Prediksi":
             input_df[col] = input_df[col].astype("category")
 
         try:
-            prob = model.predict_proba(input_df)[0][1]  # Probabilitas kelas 1 (berisiko)
-            pred = int(prob >= 0.5)  # Default threshold 0.5
+            # Prediksi probabilitas kelas 1 (berisiko)
+            prob = model.predict_proba(input_df)[0][1]
+            pred = int(prob >= 0.5)
 
-            st.write(f"🔢 **Probabilitas berisiko**: `{prob:.2f}`")
+            st.write(f"🔢 **Probabilitas Risiko**: `{prob:.2f}`")
 
             if pred == 1:
                 st.error("⚠️ Pasien berisiko mengalami penyakit jantung.")
             else:
                 st.success("✅ Pasien tidak berisiko mengalami penyakit jantung.")
 
-            # Tambahkan slider threshold jika mau kontrol manual
-            st.slider("Threshold Risiko", 0.0, 1.0, 0.5, key="threshold", disabled=True)
-
         except Exception as e:
             st.error("❌ Terjadi kesalahan saat prediksi.")
             st.exception(e)
-
