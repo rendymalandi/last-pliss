@@ -31,7 +31,7 @@ elif page == "Modeling":
         X = df.drop("Heart Disease", axis=1)
         y = df["Heart Disease"]
 
-        # Pastikan kolom kategorikal dikonversi seperti saat training
+        # Ubah kategorikal sesuai training
         categorical_cols = [
             "Sex", "Chest pain type", "EKG results", "Exercise angina",
             "Slope of ST", "Thallium"
@@ -41,12 +41,11 @@ elif page == "Modeling":
 
         y_pred = model.predict(X)
 
-        # Tangani jika label prediksi berupa angka dan y berupa string
+        # Jika y masih berupa string
         if y.dtype == object:
             from sklearn.preprocessing import LabelEncoder
             le = LabelEncoder()
-            y_encoded = le.fit_transform(y)
-            y = y_encoded
+            y = le.fit_transform(y)
 
         report = classification_report(y, y_pred, output_dict=True)
         st.json(report)
@@ -57,7 +56,7 @@ elif page == "Modeling":
 elif page == "Prediksi":
     st.title("🩺 Prediksi Penyakit Jantung")
 
-    # Input sesuai nama kolom training
+    # Input pengguna
     age = st.number_input("Usia", 1, 120, 30)
     sex = st.selectbox("Jenis Kelamin", ["M", "F"])
     chest_pain = st.selectbox("Tipe Nyeri Dada", ["TA", "ATA", "NAP", "ASY"])
@@ -81,35 +80,35 @@ elif page == "Prediksi":
     threshold = st.slider("🎚️ Threshold Risiko", 0.0, 1.0, 0.5, step=0.01)
 
     if st.button("Prediksi"):
+        # Mapping kategori ke angka (harus sesuai model training!)
+        sex_map = {"M": 1, "F": 0}
+        chest_pain_map = {"TA": 0, "ATA": 1, "NAP": 2, "ASY": 3}
+        ekg_map = {"Normal": 0, "ST": 1, "LVH": 2}
+        angina_map = {"Y": 1, "N": 0}
+        slope_map = {"Up": 0, "Flat": 1, "Down": 2}
+        thallium_map = {"Normal": 3, "Fixed Defect": 6, "Reversable Defect": 7}
+
         input_df = pd.DataFrame({
             "Age": [age],
-            "Sex": [sex],
-            "Chest pain type": [chest_pain],
+            "Sex": [sex_map[sex]],
+            "Chest pain type": [chest_pain_map[chest_pain]],
             "BP": [bp],
             "Cholesterol": [cholesterol],
             "FBS over 120": [fbs],
-            "EKG results": [ekg],
+            "EKG results": [ekg_map[ekg]],
             "Max HR": [max_hr],
-            "Exercise angina": [exercise_angina],
+            "Exercise angina": [angina_map[exercise_angina]],
             "ST depression": [st_depression],
-            "Slope of ST": [slope],
+            "Slope of ST": [slope_map[slope]],
             "Number of vessels fluro": [vessels],
-            "Thallium": [thallium]
+            "Thallium": [thallium_map[thallium]]
         })
 
-        categorical = [
-            "Sex", "Chest pain type", "EKG results", "Exercise angina",
-            "Slope of ST", "Thallium"
-        ]
-        for col in categorical:
-            input_df[col] = input_df[col].astype("category")
-
         try:
-            prob = model.predict_proba(input_df)[0][1]  # Probabilitas kelas 1 (berisiko)
+            prob = model.predict_proba(input_df)[0][1]
             pred = int(prob >= threshold)
 
-            # Debug info tambahan
-            st.write("\n🧾 Input dikirim ke model:")
+            st.write("🧾 Input yang dikirim ke model:")
             st.dataframe(input_df)
             st.write(f"🔢 **Probabilitas Risiko (kelas 1)**: `{prob:.2f}`")
             st.write(f"📈 **Threshold saat ini**: `{threshold}`")
